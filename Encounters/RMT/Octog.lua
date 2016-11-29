@@ -156,7 +156,7 @@ function Mod:new(o)
                 enable = true,
                 position = 1,
                 thickness = 5,
-                color = "ff0000ff",
+                color = "ffffff00",
                 label = "cast.hookshot",
             },
             shards = {
@@ -208,13 +208,12 @@ function Mod:OnUnitCreated(nId, tUnit, sName, bInCombat)
 end
 
 function Mod:ExpandCircles()
-	Print("expanding circles")
 	for i, v in ipairs(self.tpools) do
 		self.tpools[i].timer = self.tpools[i].timer + POOL_CHECK_INTERVALL
 		local tUnit = GameLib.GetUnitById(self.tpools[i].id) 
 		if tUnit then
-			if tpools[i].timer % 7 == 0 then
-				self.core:DrawPolygon("pool".. tostring(self.tpools[i].id), tUnit, self.config.lines.hookshot, 5.2 + (tpools[i].timer / 7), 0, 20)
+			if self.tpools[i].timer % 8 == 0 then
+				self.core:DrawPolygon("pool".. tostring(self.tpools[i].id), tUnit, self.config.lines.hookshot, 5.2 + 2 * (self.tpools[i].timer / 8), 0, 20)
 			end
 		end
     end
