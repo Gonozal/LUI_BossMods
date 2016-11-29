@@ -154,10 +154,10 @@ function Mod:new(o)
             },
 			pools = {
                 enable = true,
-                position = 1,
+                position = 4,
                 thickness = 5,
-                color = "ffffff00",
-                label = "cast.hookshot",
+                sColor = "ff0000ff",
+                label = "units.noxious_ink_pool",
             },
             shards = {
                 enable = true,
@@ -165,7 +165,7 @@ function Mod:new(o)
                 thickness = 6,
                 color = "ff00ffff",
                 label = "unit.shard",
-            },
+             },
             squirgling = {
                 enable = true,
                 position = 3,
@@ -202,7 +202,7 @@ function Mod:OnUnitCreated(nId, tUnit, sName, bInCombat)
         end
         self.tShardIds[nId] = false;
 	elseif sName == self.L["unit.noxious_ink_pool"] then
-		self.core:DrawPolygon("pool".. tostring(nId), tUnit, self.config.lines.hookshot, 5.2, 0, 20)
+		self.core:DrawPolygon("pool".. tostring(nId), tUnit, self.config.lines.pool, 5.2, 0, 20)
 		table.insert(self.tpools, {id = nId, timer = 0})
     end
 end
@@ -213,7 +213,7 @@ function Mod:ExpandCircles()
 		local tUnit = GameLib.GetUnitById(self.tpools[i].id) 
 		if tUnit then
 			if self.tpools[i].timer % 8 == 0 then
-				self.core:DrawPolygon("pool".. tostring(self.tpools[i].id), tUnit, self.config.lines.hookshot, 5.2 + 2 * (self.tpools[i].timer / 8), 0, 20)
+				self.core:DrawPolygon("pool".. tostring(self.tpools[i].id), tUnit, self.config.lines.pool, 5.2 + 2 * (self.tpools[i].timer / 8), 0, 20)
 			end
 		end
     end
