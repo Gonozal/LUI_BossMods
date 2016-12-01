@@ -39,11 +39,15 @@ local Locales = {
         ["datachron.electroshock"] = "(.*) suffers from Electroshock",
         -- Labels
         ["label.pillar"] = "20% Health Warning",
+		["label.electroshock_leave"] = "Electroshock Leave",
+		["label.electroshock_return"] = "Electroshock Return",
         ["label.pillar_health"] = "Pillar Health",
         ["label.circle_telegraph"] = "Circle Telegraphs",
         ["label.sword_jump"] = "Sword Rocket Jump",
         ["label.gun_jump"] = "Gun Rocket Jump",
         ["label.gun_return"] = "Return to Gun Reminder",
+		["label.electroshock_lines"] = "Electroshock Lines",
+		
     },
     ["deDE"] = {},
     ["frFR"] = {
@@ -180,11 +184,13 @@ function Mod:new(o)
 			vulnerability_leave = {
                 enable = true,
                 position = 5,
+				label = "label.electroshock_leave",
 				sound = "run-away",
             },
 			vulnerability_return = {
                 enable = true,
                 position = 6,
+				label = "label.electroshock_leave",
 				sound = "run-away",
             },
         },
@@ -339,6 +345,7 @@ function Mod:new(o)
                 enable = true,
                 thickness = 5,
                 color = "ffff0000",
+				label = "label.electroshock_lines",
             },
         },
         texts = {
@@ -541,20 +548,21 @@ function Mod:OnCastEnd(nId, sCastName, tCast, sName)
     if sName == self.L["unit.boss_gun"] and sCastName == self.L["cast.electroshock"] then
         self.core:AddTimer("cast.electroshock", sCastName, 18.5, self.config.timers.electroshock)
         self.electroshock = Apollo.GetTickCount()
-		self.removeElectroshockLines()
-		electroshockTimer = ApolloTimer.Create(14, true, "electroshockLines", Mod)
+		self:RemoveElectroshockLines()
+		electroshockTimer = ApolloTimer.Create(14, true, "ElectroshockLines", Mod)
     elseif sName == self.L["unit.boss_sword"] and sCastName == self.L["cast.liquidate"] then
         self.core:AddTimer("cast.liquidate", sCastName, 21.5, self.config.timers.liquidate)
         self.liquidate = Apollo.GetTickCount()
     end
 end
 
-function Mod:electroshockLines()
+function Mod:ElectroshockLines()
 	local tPartyUnit
 	for i = 1, 20, 1 do
+		Print("maybe (not?) drawling line for " .. tPartyUnit:GetName())
 		tPartyUnit = GroupLib.GetUnitForGroupMember(i)
 		if self:GetPlatform(tOrvulgh) == self:GetPlatform(tPartyUnit) then
-			--Print(i)
+			Print("drawling line for " .. tPartyUnit:GetName())
 			self.core:DrawLineBetween("player" .. tostring(i), tPartyUnit, tOrvulgh, self.config.lines.electroshock)
 		end
 	end
@@ -562,11 +570,11 @@ function Mod:electroshockLines()
 	electroshockTimer = nil
 end
 
-function Mod:removeElectroshockLines()
+function Mod:RemoveElectroshockLines()
 	local tPartyUnit
 	for i = 1, 20, 1 do
 		tPartyUnit = GroupLib.GetUnitForGroupMember(i)
-		core:RemoveLineBetweenUnits("player" .. tostring(i))
+		self.core:RemoveLineBetween("player" .. tostring(i))
 	end
 end
 
@@ -601,7 +609,7 @@ function Mod:OnEnable()
 end
 
 function Mod:OnDisable()
-	self.removeElectroshockLines()
+	self:RemoveElectroshockLines()
     self.run = false
 end
 

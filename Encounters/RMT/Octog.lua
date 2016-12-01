@@ -10,6 +10,7 @@ local Locales = {
         -- Units
         ["unit.boss"] = "Star-Eater the Voracious",
     	["unit.shard"] = "Astral Shard",
+		["unit.shard_circle"] = "Astral Shard Circle",
         ["unit.squirgling"] = "Squirgling",
         ["unit.chaos_orb"] = "Chaos Orb",
         ["unit.noxious_ink_pool"] = "Noxious Ink Pool",
@@ -27,6 +28,8 @@ local Locales = {
         ["label.next_flamethrower"] = "Next Flamethrower",
         ["label.next_orbs"] = "Next Orbs",
         ["label.chaos_tether"] = "Chaos Tether",
+		["label.shard_circle"] = "Astral Shard Circle",
+		["label.noxious_ink_pool"] = "Squirgling Pools",
     },
     ["deDE"] = {
         ["unit.boss"] = "Star-Eater the Voracious",
@@ -154,11 +157,19 @@ function Mod:new(o)
             },
 			pools = {
                 enable = true,
-                position = 4,
+                position = 5,
                 thickness = 5,
                 sColor = "ff0000ff",
-                label = "units.noxious_ink_pool",
+				color = "ff0000ff",
+                label = "label.noxious_ink_pool",
             },
+			shard_circles = {
+                enable = true,
+                position = 4,
+                thickness = 5,
+                sColor = "ff00ffff",
+                label = "label.shard_circle",
+            },	
             shards = {
                 enable = true,
                 position = 2,
@@ -185,6 +196,8 @@ function Mod:Init(parent)
     self.L = parent:GetLocale(Encounter,Locales)
 end
 
+
+
 function Mod:OnUnitCreated(nId, tUnit, sName, bInCombat)
     if not self.run == true then
         return
@@ -200,9 +213,16 @@ function Mod:OnUnitCreated(nId, tUnit, sName, bInCombat)
         if not self.tShardTimer then
             self.tShardTimer = ApolloTimer.Create(.1, true, "CheckShardsTimer", self)
         end
+		local shardPos = tUnit:GetPosition()
+		if shardPos.y - ROOM_FLOOR_Y < 20 then
+			local size = 2 - ((shardPos.y - ROOM_FLOOR_Y) / 40)
+			shardPos.y = ROOM_FLOOR_Y
+			--self.core:DrawPolygon(nId, shardPos, size, 0, 3, "red", 20)
+			self.core:DrawPolygon("shardcircle".. tostring(nId), Vector3.New(shardPos), self.config.lines.shard_circles, 2, 0, 20)
+		end
         self.tShardIds[nId] = false;
 	elseif sName == self.L["unit.noxious_ink_pool"] then
-		self.core:DrawPolygon("pool".. tostring(nId), tUnit, self.config.lines.pool, 5.2, 0, 20)
+		self.core:DrawPolygon("pool".. tostring(nId), tUnit, self.config.lines.pools, 5.2, 0, 20)
 		table.insert(self.tpools, {id = nId, timer = 0})
     end
 end
@@ -213,7 +233,7 @@ function Mod:ExpandCircles()
 		local tUnit = GameLib.GetUnitById(self.tpools[i].id) 
 		if tUnit then
 			if self.tpools[i].timer % 8 == 0 then
-				self.core:DrawPolygon("pool".. tostring(self.tpools[i].id), tUnit, self.config.lines.pool, 5.2 + 2 * (self.tpools[i].timer / 8), 0, 20)
+				self.core:DrawPolygon("pool".. tostring(self.tpools[i].id), tUnit, self.config.lines.pools, 5.2 + 2 * (self.tpools[i].timer / 8), 0, 20)
 			end
 		end
     end
@@ -223,6 +243,7 @@ function Mod:OnUnitDestroyed(nId, tUnit, sName)
     if sName == self.L["unit.shard"] then
         self.tShardIds[nId] = nil
         self.core:RemoveLineBetween(nId)
+		self.core:RemovePolygon("shardcircle".. tostring(nId))
     end
 end
 
