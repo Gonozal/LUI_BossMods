@@ -16,6 +16,10 @@ local Locales = {
         ["alert.solar_wind"] = "Reset your stacks!",
         -- Labels
         ["label.solar_wind"] = "Solar Wind Stacks",
+		["label.directions"] = "Cardinal Directions",
+		["label.asteroid_player"] = "Lines to Asteroids",
+		["label.debris_player"] = "Lines to Debris",
+
     },
     ["deDE"] = {
         ["unit.boss"] = "Starmap",
@@ -26,6 +30,8 @@ local Locales = {
 }
 
 local DEBUFF_SOLAR_WIND = 87536
+
+local STARMAP_FLOOR_Y = -96
 
 function Mod:new(o)
     o = o or {}
@@ -85,13 +91,33 @@ function Mod:new(o)
                 color = "ffff0000",
                 label = "unit.asteroid",
             },
+			asteroid_player = {
+                enable = true,
+                thickness = 4,
+                color = "ffff0000",
+                label = "label.asteroid_player",
+            },
             debris = {
                 enable = true,
                 thickness = 8,
                 color = "ffff0000",
                 label = "unit.debris",
             },
+			debris_player = {
+                enable = true,
+                thickness = 4,
+                color = "fff4d742",
+                label = "unit.debris",
+            },
         },
+		texts = {
+			cardinal_directions = {
+				enable = true,
+                font = "Subtitle",
+                color = false,
+                label = "label.directions",
+			},
+		},
         sounds = {
             solar_wind = {
                 enable = true,
@@ -121,8 +147,11 @@ function Mod:OnUnitCreated(nId, tUnit, sName, bInCombat)
         self.core:AddTimer("Timer_WorldEnder", self.L["message.next_world_ender"], 66, self.config.timers.world_ender)
     elseif sName == self.L["unit.asteroid"] then
         self.core:DrawLine(nId, tUnit, self.config.lines.asteroid, 15)
+		self.core:DrawLineBetween("to" .. tostring(nId), tUnit, GameLib.GetPlayerUnit(), self.config.lines.asteroid_player)
     elseif sName == self.L["unit.debris"] then
         self.core:DrawPolygon(nId, tUnit, self.config.lines.debris, 3, 0, 6)
+		self.core:DrawLineBetween("to" .. tostring(nId), tUnit, GameLib.GetPlayerUnit(), self.config.lines.debris_player)
+
     end
 end
 
@@ -161,7 +190,20 @@ end
 
 function Mod:OnEnable()
     self.run = true
-    self.core:AddTimer("Timer_WorldEnder", self.L["message.next_world_ender"], 60, self.config.timers.world_ender)
+    self.core:AddTimer("Timer_WorldEnder", self.L["message.next_world_ender"], 52, self.config.timers.world_ender)
+	
+	local south_pos = Vector3.New({x = -77, y= STARMAP_FLOOR_Y, z = 410})
+	local north_pos = Vector3.New({x = -77,  y = STARMAP_FLOOR_Y,  z = 310})
+	local west_pos =  Vector3.New({x = -127, y = STARMAP_FLOOR_Y, z = 360})
+	local east_pos =  Vector3.New({x = -27,  y = STARMAP_FLOOR_Y,  z = 360})
+	
+	self.core:DrawText("southLabel", south_pos, self.config.texts.cardinal_directions, "South", false, 50)
+	self.core:DrawText("northLabel", north_pos, self.config.texts.cardinal_directions, "North", false, 50)
+	self.core:DrawText("westLabel", west_pos, self.config.texts.cardinal_directions, "West", false, 50)
+	self.core:DrawText("eastLabel", east_pos, self.config.texts.cardinal_directions, "East", false, 50)
+
+
+
 end
 
 function Mod:OnDisable()
